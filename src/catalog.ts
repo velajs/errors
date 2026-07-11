@@ -23,8 +23,8 @@ const makeCatalog = <C extends string>(entries: Readonly<Record<C, ErrorCatalogE
       docsUrl: options.docsUrl ?? entry?.docsUrl,
     });
   },
-  has: (code) => code in entries,
-  get: (code) => (entries as Record<string, ErrorCatalogEntry>)[code],
+  has: (code) => Object.hasOwn(entries, code),
+  get: (code) => (Object.hasOwn(entries, code) ? (entries as Record<string, ErrorCatalogEntry>)[code] : undefined),
 });
 
 export const defineErrorCatalog = <const T extends Record<string, ErrorCatalogEntry>>(
@@ -35,7 +35,7 @@ export const composeCatalogs = (...catalogs: Array<Catalog<string>>): Catalog<st
   const merged: Record<string, ErrorCatalogEntry> = {};
   for (const catalog of catalogs) {
     for (const [code, entry] of Object.entries<ErrorCatalogEntry>(catalog.entries)) {
-      if (code in merged) {
+      if (Object.hasOwn(merged, code)) {
         throw new VelaError('internal', { message: `duplicate error code '${code}' while composing catalogs` });
       }
       merged[code] = entry;

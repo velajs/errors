@@ -36,6 +36,22 @@ describe('composeCatalogs', () => {
   });
 });
 
+describe('prototype-key safety', () => {
+  const catalog = defineErrorCatalog({ real_code: { status: 400, title: 'Real' } });
+
+  it('has/get do not walk Object.prototype', () => {
+    expect(catalog.has('toString')).toBe(false);
+    expect(catalog.get('toString')).toBeUndefined();
+    expect(catalog.has('real_code')).toBe(true);
+  });
+
+  it('composeCatalogs does not false-positive on prototype keys', () => {
+    const proto = defineErrorCatalog({ constructor: { status: 400, title: 'Ctor-named code' } });
+    const composed = composeCatalogs(catalog, proto);
+    expect(composed.has('constructor')).toBe(true);
+  });
+});
+
 describe('STATUS_TO_CODE', () => {
   it('maps every core status back to its code', () => {
     expect(STATUS_TO_CODE[404]).toBe('not_found');
