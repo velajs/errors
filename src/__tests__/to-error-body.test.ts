@@ -31,6 +31,14 @@ describe('toErrorBody', () => {
     expect(redacted).toBe(true);
     expect(body.error.code).toBe('db_corruption');
     expect(body.error.message).not.toContain('checksum');
+    expect(body.error.details).toBeUndefined();
+    expect(body.error.hint).toBeUndefined();
+  });
+
+  it('open codes with status 500 still echo (500 alone never redacts)', () => {
+    const { body, redacted } = toErrorBody(new VelaError('db_x', { status: 500, message: 'app-chosen safe text' }));
+    expect(redacted).toBe(false);
+    expect(body.error).toStrictEqual({ code: 'db_x', message: 'app-chosen safe text' });
   });
 
   it('echoes branded non-internal errors — catalogued or open (rule 3)', () => {
@@ -39,7 +47,7 @@ describe('toErrorBody', () => {
     );
     expect(redacted).toBe(false);
     expect(status).toBe(410);
-    expect(body.error).toEqual({
+    expect(body.error).toStrictEqual({
       code: 'order_expired',
       message: 'Order 42 expired',
       hint: 'Create a new order.',

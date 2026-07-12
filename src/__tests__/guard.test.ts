@@ -29,4 +29,12 @@ describe('isVelaError', () => {
     expect(isVelaError({ type: 'VelaError', code: 'x', status: 500 })).toBe(false);
     expect(isVelaError(null)).toBe(false);
   });
+
+  it('rejects when only code has the wrong type', () => {
+    expect(isVelaError(Object.assign(new Error('x'), { code: 1, status: 500, type: 'VelaError' }))).toBe(false);
+  });
+
+  it('rejects when only status has the wrong type', () => {
+    expect(isVelaError(Object.assign(new Error('x'), { code: 'x', status: 'y', type: 'VelaError' }))).toBe(false);
+  });
 });

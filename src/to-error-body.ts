@@ -5,8 +5,8 @@ export interface WireErrorObject {
   code: string;
   message: string;
   hint?: string;
-  details?: unknown;
   docsUrl?: string;
+  details?: unknown;
 }
 
 export interface ErrorBodyResult {
