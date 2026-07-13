@@ -24,9 +24,6 @@ catalogs:
     tsdown:
       specifier: ^0.22.4
       version: 0.22.5
-    typescript:
-      specifier: ^7.0.2
-      version: 7.0.2
     vitest:
       specifier: ^4.1.10
       version: 4.1.10
@@ -54,7 +51,7 @@ importers:
         specifier: 'catalog:'
         version: 0.22.5(@arethetypeswrong/core@0.18.5)(publint@0.3.21)(typescript@7.0.2)
       typescript:
-        specifier: 'catalog:'
+        specifier: 7.0.2
         version: 7.0.2
       vitest:
         specifier: 'catalog:'
