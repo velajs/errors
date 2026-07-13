@@ -17,5 +17,9 @@ export interface VelaErrorLike extends Error {
 export const isVelaError = (error: unknown): error is VelaErrorLike => {
   if (!(error instanceof Error)) return false;
   const candidate = error as Partial<VelaErrorLike>;
-  return typeof candidate.code === 'string' && typeof candidate.status === 'number' && candidate.type === 'VelaError';
+  return (
+    typeof candidate.code === 'string' &&
+    typeof candidate.status === 'number' &&
+    candidate.type === 'VelaError'
+  );
 };

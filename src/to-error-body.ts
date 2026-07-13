@@ -64,6 +64,7 @@ export const toErrorBody = (error: unknown, options: ToErrorBodyOptions = {}): E
   if (options.includeHint !== false && hint !== undefined) wire.hint = hint;
   const docsUrl = error.docsUrl ?? entry?.docsUrl;
   if (docsUrl !== undefined) wire.docsUrl = docsUrl;
-  if (error.data !== undefined) wire.details = options.encodeData ? options.encodeData(error.data) : error.data;
+  if (error.data !== undefined)
+    wire.details = options.encodeData ? options.encodeData(error.data) : error.data;
   return { body: { error: wire }, status: error.status, redacted: false };
 };

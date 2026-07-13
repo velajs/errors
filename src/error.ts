@@ -26,13 +26,23 @@ export class VelaError extends Error {
   constructor(code: CoreErrorCode, options?: VelaErrorOptions);
   constructor(code: string, options: VelaErrorOptions & { status: number });
   constructor(code: string, options: VelaErrorOptions = {}) {
-    const entry = (CORE_ENTRIES as Record<string, { status: number; title: string; hint?: string; docsUrl?: string }>)[code];
-    super(options.message ?? entry?.title ?? code, options.cause !== undefined ? { cause: options.cause } : undefined);
+    const entry = (
+      CORE_ENTRIES as Record<
+        string,
+        { status: number; title: string; hint?: string; docsUrl?: string }
+      >
+    )[code];
+    super(
+      options.message ?? entry?.title ?? code,
+      options.cause !== undefined ? { cause: options.cause } : undefined,
+    );
     this.name = 'VelaError';
     this.code = code;
     this.status = options.status ?? entry?.status ?? 500;
-    if (options.hint ?? entry?.hint) this.hint = options.hint ?? entry?.hint;
-    if (options.docsUrl ?? entry?.docsUrl) this.docsUrl = options.docsUrl ?? entry?.docsUrl;
+    const hint = options.hint ?? entry?.hint;
+    const docsUrl = options.docsUrl ?? entry?.docsUrl;
+    if (hint !== undefined) this.hint = hint;
+    if (docsUrl !== undefined) this.docsUrl = docsUrl;
     if (options.data !== undefined) this.data = options.data;
     Object.setPrototypeOf(this, new.target.prototype);
   }

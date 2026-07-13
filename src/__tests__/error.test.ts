@@ -16,7 +16,10 @@ describe('VelaError', () => {
   });
 
   it('carries every field as an OWN ENUMERABLE property (wire-codec contract)', () => {
-    const err = new VelaError('conflict', { hint: 'Retry with the latest revision.', data: { id: 1 } });
+    const err = new VelaError('conflict', {
+      hint: 'Retry with the latest revision.',
+      data: { id: 1 },
+    });
     const keys = Object.keys(err);
     for (const k of ['type', 'code', 'status', 'hint', 'data']) expect(keys).toContain(k);
     const twin = JSON.parse(JSON.stringify({ ...err }));
