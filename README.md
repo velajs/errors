@@ -73,6 +73,30 @@ return Response.json(body, { status });
 
 `invariant(condition, message, data?)` narrows types (`asserts condition`) and, on failure, throws an `internal`-coded `VelaError` — always redacted by rule 2. `unreachable(value: never)` is its exhaustiveness-check companion.
 
+## Error fingerprinting (`@velajs/errors/fingerprint`)
+
+A separate, tree-shakeable subpath that turns noisy repeats of the same error into one stable **issue** identity. It is zero-dependency and computes identically in the browser, the workerd runtime, and Node, so a live in-flight error and one recomputed later from a persisted log row collapse onto the same fingerprint.
+
+```ts
+import { fingerprintError, bucketMessage, FINGERPRINT_VERSION } from '@velajs/errors/fingerprint';
+
+// 16-hex-char stable grouping id over functionPath :: bucket(message).
+fingerprintError({ functionPath: 'orders:get', message: 'order 550e8400-… not found' });
+
+// The `code` is metadata and is NEVER hashed — the redacted wire view (whose
+// code toErrorBody may rewrite or drop) and the raw server-side error group
+// together. It also works straight off toErrorBody's output:
+const { body } = toErrorBody(err);
+fingerprintError({ functionPath, message: body.error.message, code: body.error.code });
+```
+
+- **`fingerprintError({ functionPath, message, code? }): string`** — the stable 16-hex grouping hash. `code` is display metadata only and is never folded into the hash.
+- **`bucketMessage(message): string`** — the exported normalizer. Strips per-occurrence noise (URLs, request/filesystem paths, UUIDs, IPs, long numeric/hex ids, timestamps, emails) so a route-scanner sweep of 404s with varying paths folds to a single fingerprint. Input is clamped (~1 KB) before any regex runs as a ReDoS guard.
+- **`FINGERPRINT_VERSION`** — bump whenever the bucketer heuristics change; changed heuristics re-partition history, so consumers that persist fingerprints store this alongside each hash to know when a recompute is due.
+- **`sha256Hex(input): string`** — the internal portable synchronous SHA-256 (no `node:crypto`, no async `crypto.subtle`), also exported. **Content-addressing / grouping only — never a security or MAC primitive.**
+
+> The message-normalization / grouping approach is inspired by [`@superlog/fingerprint`](https://github.com/superloglabs/superlog) (Apache-2.0). This is an independent, clean-room implementation.
+
 ## API
 
 - `VelaError`, `VelaErrorOptions` — the one error and its constructor options.
@@ -81,3 +105,4 @@ return Response.json(body, { status });
 - `defineErrorCatalog`, `composeCatalogs`, `Catalog`, `ErrorCatalogEntry` — catalog authoring.
 - `CORE_CATALOG`, `CORE_ENTRIES`, `CoreErrorCode`, `STATUS_TO_CODE` — the core catalog and its lookups.
 - `invariant`, `unreachable` — internal-coded assertion helpers.
+- `@velajs/errors/fingerprint`: `fingerprintError`, `ErrorFingerprintInput`, `bucketMessage`, `FINGERPRINT_VERSION`, `sha256Hex` — the error-grouping subpath.
