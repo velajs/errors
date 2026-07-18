@@ -32,7 +32,11 @@ jobs:
       - name: Validate release lock integrity
         run: node scripts/check-release-lock.mjs
       - run: pnpm install --frozen-lockfile
+      - name: Determine whether release work is pending
+        id: release-work
+        run: node scripts/check-release-work.mjs
       - name: Create release PR or publish
+        if: steps.release-work.outputs.run == 'true'
         uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # v1.9.0
         with:
           publish: pnpm release
